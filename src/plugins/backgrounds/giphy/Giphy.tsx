@@ -20,6 +20,9 @@ const Giphy: FC<Props> = ({ cache, data = defaultData, setCache, loader }) => {
 
   if (!gif) return null;
 
+  console.log('background', url);
+
+
   return (
     <div className="Giphy fullscreen">
       <Backdrop
