@@ -4,11 +4,8 @@ import { API } from '../../types';
 type By = 'official' | 'collections' | 'search';
 
 export interface Data {
-  by: By;
-  collections: string;
-  featured: boolean;
-  search: string;
   timeout: number;
+  lastAlbum: boolean;
 }
 
 export interface Image {
@@ -24,9 +21,6 @@ type Cache = RotatingCache<Image>;
 export type Props = API<Data, Cache>;
 
 export const defaultData: Data = {
-  by: 'official',
-  collections: '',
-  featured: false,
-  search: '',
+  lastAlbum: false,
   timeout: 0,
 };

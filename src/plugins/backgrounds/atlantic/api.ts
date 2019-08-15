@@ -9,23 +9,63 @@ function getRandomInt(min: number, max: number) {
 }
 
 export const getImage = async function (
-  settings: Pick<Data, 'by' | 'collections' | 'featured' | 'search'>,
+  settings: Pick<Data, 'lastAlbum'>,
   loader: API['loader'],
 ): Promise<Image> {
   // Setup
-  const { by, collections, featured, search } = settings;
+  const { lastAlbum } = settings;
   const headers = new Headers();
+  const parser = new DOMParser();
 
+  const feedUrl = 'http://cdn.townapp.nz/corsme.php?url=http://feeds.feedburner.com/theatlantic/infocus?format=xml';
+
+  let cachedFeed: { time: number, feed: string } = JSON.parse(localStorage.getItem('atlanticFeed') || '{}');
+
+  let parsedXml: Document;
+
+  if (!cachedFeed || !('time' in cachedFeed) || cachedFeed.time + 8 * 60 * 60 * 1000 < new Date().getTime()) {
+    const resFeed = await (await fetch(feedUrl, { headers })).text();
+    parsedXml = parser.parseFromString(resFeed, 'text/html');
+    localStorage.setItem('atlanticFeed', JSON.stringify({ time: new Date().getTime(), feed: resFeed }));
+  } else {
+    console.log('rss from cache');
+    parsedXml = parser.parseFromString(cachedFeed.feed, 'text/html');
+  }
+
+  let albums: HTMLCollectionOf<Element> = parsedXml.getElementsByTagName("feedburner:origLink");
+
+  // whatever the top cache is doing we still cache per day the  atlantic url call
+
+  // option? last album, random album
+  const randomAlbum = lastAlbum === true ? 0 : getRandomInt(1, albums.length);
+
+  const itemTag = albums[randomAlbum].parentElement as HTMLElement;
+  const albumtitle = itemTag.getElementsByTagName('title')[0].textContent;
 
   // Build search url
-  let url = 'http://cdn.townapp.nz/corsme.php?url=https://www.theatlantic.com/photo/2019/08/photos-of-the-week-pikachu-outbreak-dinosaur-crossing-ducky-derby/595804/';
+  //let url = 'http://cdn.townapp.nz/corsme.php?url=https://www.theatlantic.com/photo/2019/08/photos-of-the-week-pikachu-outbreak-dinosaur-crossing-ducky-derby/595804/';
+  let originalUrl = albums[randomAlbum].textContent || 'https://www.theatlantic.com/photo/2019/08/photos-of-the-week-pikachu-outbreak-dinosaur-crossing-ducky-derby/595804/'; //first one
+
+  let cachedAlbum: { album: string } = JSON.parse(localStorage.getItem(originalUrl) || '{}');
+
+  console.log("Latest album: ", originalUrl, albumtitle);
+  const url = 'http://cdn.townapp.nz/corsme.php?url=' + originalUrl;
 
   // Fetch from API
   loader.push();
-  const res = await (await fetch(url, { headers })).text();
 
-  let parser = new DOMParser();
-  let parsedHtml = parser.parseFromString(res, 'text/html');
+  let res;
+  let parsedHtml;
+
+  if (!cachedAlbum || !('album' in cachedAlbum)) {
+    res = await (await fetch(url, { headers })).text();
+    localStorage.setItem(originalUrl, JSON.stringify({ time: new Date().getTime(), album: res }));
+    parsedHtml = parser.parseFromString(res, 'text/html');
+  } else {
+    console.log('album from cache');
+    parsedHtml = parser.parseFromString(cachedAlbum.album, 'text/html');
+  }
+
   let pictures = parsedHtml.getElementsByTagName("picture");
 
   console.log('pictures', pictures);
@@ -54,8 +94,8 @@ export const getImage = async function (
           data: new Blob(), // do not use
           image_link: pictureurl,
           location_title: caption,
-          user_name: 'as',
-          user_link: pictureurl,
+          user_name: albumtitle || '',
+          user_link: originalUrl,
         };
       }
     }

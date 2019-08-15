@@ -6,6 +6,7 @@ import { getImage } from './api';
 import { Props, defaultData } from './types';
 import UnsplashCredit from './UnsplashCredit';
 import './Unsplash.sass';
+import UnsplashTitle from './UnsplashTitle';
 
 const Unsplash: FC<Props> = ({
   cache,
@@ -18,7 +19,7 @@ const Unsplash: FC<Props> = ({
     () => getImage(data, loader),
     cacheArea,
     data.timeout * 10000,
-    [data.by, data.collections, data.featured, data.search],
+    [data.lastAlbum],
   );
 
   let url = '';
@@ -32,11 +33,12 @@ const Unsplash: FC<Props> = ({
 
   return (
     <div className="Unsplash fullscreen">
+
       <Backdrop
         className="image fullscreen"
         style={{ backgroundImage: url && `url(${url})` }}
       />
-
+      {cache && <UnsplashTitle image={cache.now} />}
       {cache && <UnsplashCredit image={cache.now} />}
     </div>
   );

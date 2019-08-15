@@ -5,9 +5,9 @@
   "private": true,
   "scripts": {
     "build": "npm run-script build:web",
-    "build:chromium": "NODE_ENV=production BUILD_TARGET=chromium webpack",
-    "build:firefox": "NODE_ENV=production BUILD_TARGET=firefox webpack",
-    "build:web": "NODE_ENV=production BUILD_TARGET=web webpack",
+    "build:chromium": "set NODE_ENV=production; set BUILD_TARGET=chromium webpack",
+    "build:firefox": "set NODE_ENV=production; set BUILD_TARGET=firefox; webpack",
+    "build:web": "set NODE_ENV=production BUILD_TARGET=web webpack",
     "start": "webpack-dev-server",
     "test": "jest --config jest.json",
     "translations": "node ./scripts/translations.js"

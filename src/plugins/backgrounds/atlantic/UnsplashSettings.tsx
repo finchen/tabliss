@@ -23,67 +23,13 @@ const UnsplashSettings: FC<Props> = ({ data = defaultData, setData }) => (
 
     <label>
       <input
-        type="radio"
-        checked={data.by === 'official'}
-        onChange={() => setData({ ...data, by: 'official' })}
+        type="checkbox"
+        checked={data.lastAlbum}
+        onChange={event => setData({ ...data, lastAlbum: !data.lastAlbum })}
       />{' '}
-      Official collection
+      Last album only
     </label>
 
-    <label>
-      <input
-        type="radio"
-        checked={data.by === 'collections'}
-        onChange={() => setData({ ...data, by: 'collections' })}
-      />{' '}
-      Custom collection
-    </label>
-
-    {data.by === 'collections' && (
-      <label>
-        Collection
-        <input
-          placeholder="Collection ID number"
-          type="text"
-          value={data.collections}
-          onChange={event =>
-            setData({ ...data, collections: event.target.value })
-          }
-        />
-      </label>
-    )}
-
-    <label>
-      <input
-        type="radio"
-        checked={data.by === 'search'}
-        onChange={() => setData({ ...data, by: 'search' })}
-      />{' '}
-      Custom search
-    </label>
-
-    {data.by === 'search' && (
-      <div>
-        <label>
-          Tags
-          <input
-            placeholder="Try landscapes or animals..."
-            type="text"
-            value={data.search}
-            onChange={event => setData({ ...data, search: event.target.value })}
-          />
-        </label>
-
-        <label>
-          <input
-            type="checkbox"
-            checked={data.featured}
-            onChange={event => setData({ ...data, featured: !data.featured })}
-          />{' '}
-          Only featured images
-        </label>
-      </div>
-    )}
   </div>
 );
 
